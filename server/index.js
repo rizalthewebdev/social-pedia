@@ -8,7 +8,12 @@ import morgan from "morgan";
 import path from "path";
 import { fileURLToPath } from "url";
 import mongoose from "mongoose";
-import { register } from "./controllers/auth.js";
+import { register } from "./routes/auth.js";
+import authRoutes from "./routes/auth.js";
+import userRoutes from "./routes/user.js";
+import postRoutes from "./routes/posts.js";
+import { verifyToken } from "./middlewares/auth.js";
+import { createPost } from "./controllers/posts.js";
 
 // CONFIGURATIONS
 const __filename = fileURLToPath(import.meta.url);
@@ -37,7 +42,13 @@ const storage = multer.diskStorage({
 const upload = multer({ storage });
 
 // ROUTES WITH FILES
-app.post("/auth/register", upload.single("picture"), register);
+app.post("/auth/register", upload.single("userImage"), register);
+app.post("/posts", verifyToken, upload.single("postImage"), createPost);
+
+// ROUTES
+app.use("/auth", authRoutes);
+app.use("/user", userRoutes);
+app.use("/posts", postRoutes);
 
 // MONGOOSE SETUP
 const PORT = process.env.PORT || 3001;
